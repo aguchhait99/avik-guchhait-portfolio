@@ -102,7 +102,7 @@ export default function ResumeBuilder() {
   const handleRazorpayCheckout = async () => {
     setIsProcessingPayment(true);
     try {
-      let keyId = "rzp_test_T3SPSyJXk5Uxsr";
+      let keyId = "rzp_test_T3VMn5Cwj4gEMO";
       try {
         // 1. Fetch Razorpay key ID from server
         const keyRes = await fetch('/api/razorpay/key');

@@ -12,7 +12,7 @@ async function startServer() {
 
   // API Route - Get Razorpay Configuration Public Key safely
   app.get("/api/razorpay/key", (req, res) => {
-    const keyId = process.env.RAZORPAY_KEY_ID || "rzp_test_T3SPSyJXk5Uxsr";
+    const keyId = process.env.RAZORPAY_KEY_ID || "rzp_test_T3VMn5Cwj4gEMO";
     res.json({ keyId });
   });
 
@@ -22,8 +22,8 @@ async function startServer() {
     const currency = req.body.currency || "INR";
 
     try {
-      const keyId = process.env.RAZORPAY_KEY_ID || "rzp_test_T3SPSyJXk5Uxsr";
-      const keySecret = process.env.RAZORPAY_KEY_SECRET || "hEWzGFfcckGLdXNVCqHgjHdO";
+      const keyId = process.env.RAZORPAY_KEY_ID || "rzp_test_T3VMn5Cwj4gEMO";
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || "vGeH9z16BuRS9FZRj3a3hNQh";
 
       if (!keyId || !keySecret) {
         throw new Error("Razorpay keys not configured fully");
@@ -86,7 +86,7 @@ async function startServer() {
   app.post("/api/razorpay/verify", async (req, res) => {
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-      const keySecret = process.env.RAZORPAY_KEY_SECRET || "hEWzGFfcckGLdXNVCqHgjHdO";
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || "vGeH9z16BuRS9FZRj3a3hNQh";
 
       if (!razorpay_signature) {
         return res.json({ verified: true, status: "success", note: "Bypass verification" });
