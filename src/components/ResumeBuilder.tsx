@@ -22,6 +22,7 @@ import {
   Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import html2pdf from 'html2pdf.js';
 
 // Preset themes representing different high-quality aesthetics
 const THEMES = [
@@ -35,6 +36,14 @@ export default function ResumeBuilder() {
   const [formData, setFormData] = useState({
     name: 'Jane Doe',
     title: 'Senior Systems Engineer',
+    guardianName: 'John Doe Sr.',
+    dob: '01 January 1995',
+    nationality: 'American',
+    address: '123 Tech Park, Silicon Valley, CA 94025',
+    phone: '9999999999',
+    email: 'jane.doe@example.com',
+    linkedin: 'linkedin.com/in/janedoe',
+    github: 'github.com/janedoe',
     bio: 'Pioneering reactive cloud architectures with ultra-low latency configurations. Specialist in full-cycle DevOps and modern high-load microservices.',
     experiences: [
       {
@@ -48,6 +57,21 @@ export default function ResumeBuilder() {
         company: 'DataStream Corp',
         duration: 'Jan 2020 - May 2022',
         description: 'Pioneered custom Terraform deployment pipelines reducing build times by 35%. Configured multi-region Kubernetes clusters with automatic failover.'
+      }
+    ],
+    projects: [
+      {
+        name: 'Cloud E-commerce Platform',
+        stack: 'React, Node.js, AWS',
+        description: 'Built scalable microservices for product inventory and cart workflows.'
+      }
+    ],
+    education: [
+      {
+        degree: 'B.Tech in Computer Science',
+        institution: 'Tech University',
+        year: '2020',
+        grades: '8.5 CGPA'
       }
     ],
     skills: 'Golang, React, Docker, Kubernetes, AWS Cloud Systems, Terraform'
@@ -82,7 +106,7 @@ export default function ResumeBuilder() {
     };
   }, []);
 
-  const [selectedLayout, setSelectedLayout] = useState<'swiss' | 'split' | 'editorial'>('swiss');
+  const [selectedLayout, setSelectedLayout] = useState<'swiss' | 'split' | 'editorial' | 'avik'>('avik');
 
   const downloadCVBundle = () => {
     const target = document.getElementById('resume-print-area');
@@ -91,12 +115,44 @@ export default function ResumeBuilder() {
       return;
     }
 
-    // Trigger native browser print dialog to generate a true vector PDF.
-    // The @media print rules in index.css automatically isolate the resume-print-area
-    // and apply high-contrast formatting for perfect PDF exports.
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Popup blocker prevented opening the print window. Please allow popups.');
+      return;
+    }
+
+    const headHtml = document.head.innerHTML;
+    // We add a specific print style to remove margins and make it look like a document
+    const printStyles = `
+      <style>
+        @page { size: auto; margin: 0; }
+        body { margin: 0; padding: 20px; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        #resume-print-area { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; }
+      </style>
+    `;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html class="light">
+        <head>
+          <title>${formData.name.replace(/\s+/g, '_')}_Resume</title>
+          ${headHtml}
+          ${printStyles}
+        </head>
+        <body>
+          ${target.outerHTML}
+          <script>
+            // Wait for styles to apply
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handleRazorpayCheckout = async () => {
@@ -288,8 +344,8 @@ export default function ResumeBuilder() {
     }, 1500);
   };
 
-  // AI-Assisted copy rewriting simulation
-  const handleAIEnhance = () => {
+  // AI-Assisted copy rewriting using Gemini API
+  const handleAIEnhance = async () => {
     if (isEnhancing) return;
     setIsEnhancing(true);
     setTerminalLogs([]);
@@ -298,44 +354,41 @@ export default function ResumeBuilder() {
       '>> Establshing secure client proxy link...',
       '>> Packing payload parameters and metadata variables...',
       '>> Injecting system instructions config: [style: Swiss Modernist, tone: Bold Command]...',
-      '>> Prompt payload optimization dispatching to AI Engine...',
-      '>> Analyzing bio readability index (Current: 42% -> Projecting: 92%)...',
-      '>> Restructuring sentence structures, swapping mundane tokens with authoritative verbs...',
-      '>> Re-compiling optimized experience modules...',
-      '>> System check successfully finished!'
+      '>> Prompt payload optimization dispatching to AI Engine...'
     ];
 
-    let delay = 0;
-    steps.forEach((log, index) => {
+    // Show initial logs
+    for (let i = 0; i < steps.length; i++) {
+      setTimeout(() => setTerminalLogs(prev => [...prev, steps[i]]), i * 350);
+    }
+
+    try {
+      const response = await fetch('/api/ai/generate-cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch AI enhancements');
+      }
+
+      const enhancedData = await response.json();
+      
       setTimeout(() => {
-        setTerminalLogs(prev => [...prev, log]);
-        if (index === steps.length - 1) {
-          setIsEnhancing(false);
-          setEnhancedCount(prev => prev + 1);
-          
-          // Apply enhanced copywriting
-          setFormData(prev => ({
-            ...prev,
-            bio: 'Specialize in constructing declarative cloud computing structures and low-level microservices. Architect of enterprise database configurations supporting multi-million active customer pipelines.',
-            experiences: [
-              {
-                role: 'Principal Systems Architect',
-                company: 'Quantum Tech (Enhanced)',
-                duration: 'June 2022 - Present',
-                description: 'Engineered high-efficiency ingress routers delivering a 40% performance improvement under load. Spearheaded operational agility, guiding a senior development unit to deploy low-latency stateful APIs.'
-              },
-              {
-                role: 'Senior DevOps Architect',
-                company: 'DataStream (Enhanced)',
-                duration: 'Jan 2020 - May 2022',
-                description: 'Pioneered custom Terraform deployment pipelines reducing build times by 35%. Configured multi-region Kubernetes clusters with automatic failover.'
-              }
-            ]
-          }));
-        }
-      }, delay);
-      delay += 350;
-    });
+        setTerminalLogs(prev => [...prev, '>> System check successfully finished!']);
+        setFormData(enhancedData);
+        setEnhancedCount(prev => prev + 1);
+        setIsEnhancing(false);
+      }, steps.length * 350);
+
+    } catch (error) {
+      console.error(error);
+      setTimeout(() => {
+        setTerminalLogs(prev => [...prev, '>> ERROR: AI Engine connection failed. Check API key.']);
+        setIsEnhancing(false);
+      }, steps.length * 350);
+    }
   };
 
   const executeSimulationCheckout = (e: React.FormEvent) => {
@@ -352,13 +405,14 @@ export default function ResumeBuilder() {
   };
 
   return (
-    <section id="ai-resume" className="py-24 bg-white dark:bg-[#050505] transition-colors relative border-t border-slate-200/50 dark:border-white/10">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-5 w-96 h-96 bg-[#F27D26]/3 rounded-full filter blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-5 w-96 h-96 bg-[#F27D26]/3 rounded-full filter blur-[120px] pointer-events-none" />
-      </div>
+    <>
+      <section id="ai-resume" className="py-24 bg-white dark:bg-[#050505] transition-colors relative border-t border-slate-200/50 dark:border-white/10">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 right-5 w-96 h-96 bg-[#F27D26]/3 rounded-full filter blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-1/4 left-5 w-96 h-96 bg-[#F27D26]/3 rounded-full filter blur-[120px] pointer-events-none" />
+        </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full text-left">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full text-left">
         
         {/* Section Heading */}
         <div className="flex flex-col mb-12">
@@ -507,6 +561,78 @@ export default function ResumeBuilder() {
                         className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
                       />
                     </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Guardian / Father's Name</label>
+                      <input 
+                        type="text" 
+                        value={formData.guardianName} 
+                        onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Date of Birth</label>
+                      <input 
+                        type="text" 
+                        value={formData.dob} 
+                        onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Nationality</label>
+                      <input 
+                        type="text" 
+                        value={formData.nationality} 
+                        onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Phone</label>
+                      <input 
+                        type="text" 
+                        value={formData.phone} 
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Email</label>
+                      <input 
+                        type="email" 
+                        value={formData.email} 
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Address</label>
+                      <input 
+                        type="text" 
+                        value={formData.address} 
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">LinkedIn URL</label>
+                      <input 
+                        type="text" 
+                        value={formData.linkedin} 
+                        onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">GitHub URL</label>
+                      <input 
+                        type="text" 
+                        value={formData.github} 
+                        onChange={(e) => setFormData({ ...formData, github: e.target.value })}
+                        className="w-full px-4 py-3 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-1">
@@ -626,6 +752,196 @@ export default function ResumeBuilder() {
                     </div>
                   </div>
 
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">
+                        Projects (Multiple)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            projects: [...formData.projects, { name: '', stack: '', description: '' }]
+                          });
+                        }}
+                        className="text-[9px] font-mono uppercase tracking-wider text-[#F27D26] hover:text-[#d3641b] flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none font-bold"
+                      >
+                        <Plus className="w-3 h-3" /> Add Project
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {formData.projects.map((proj: any, idx) => (
+                        <div key={idx} className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.015] space-y-3">
+                          <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-white/10 pb-2">
+                            <span className="text-[10px] font-mono text-[#F27D26] uppercase tracking-widest font-bold">
+                              Project #{idx + 1}
+                            </span>
+                            {formData.projects.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = formData.projects.filter((_, i) => i !== idx);
+                                  setFormData({ ...formData, projects: updated });
+                                }}
+                                className="text-red-400 hover:text-red-500 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none"
+                              >
+                                <Trash2 className="w-3 h-3" /> Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Project Name</label>
+                              <input 
+                                type="text"
+                                value={proj.name || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.projects];
+                                  updated[idx] = { ...updated[idx], name: e.target.value };
+                                  setFormData({ ...formData, projects: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Tech Stack</label>
+                              <input 
+                                type="text"
+                                value={proj.stack || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.projects];
+                                  updated[idx] = { ...updated[idx], stack: e.target.value };
+                                  setFormData({ ...formData, projects: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-[#ffffff] dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Project Description</label>
+                            <textarea 
+                              rows={2}
+                              value={proj.description || ''}
+                              onChange={(e) => {
+                                const updated = [...formData.projects];
+                                updated[idx] = { ...updated[idx], description: e.target.value };
+                                setFormData({ ...formData, projects: updated });
+                              }}
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-light resize-none"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-1">
+                      <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">
+                        Education (Multiple)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            education: [...formData.education, { degree: '', institution: '', year: '', grades: '' }]
+                          });
+                        }}
+                        className="text-[9px] font-mono uppercase tracking-wider text-[#F27D26] hover:text-[#d3641b] flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none font-bold"
+                      >
+                        <Plus className="w-3 h-3" /> Add Education
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {formData.education.map((edu: any, idx) => (
+                        <div key={idx} className="p-4 border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.015] space-y-3">
+                          <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-white/10 pb-2">
+                            <span className="text-[10px] font-mono text-[#F27D26] uppercase tracking-widest font-bold">
+                              Education #{idx + 1}
+                            </span>
+                            {formData.education.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = formData.education.filter((_, i) => i !== idx);
+                                  setFormData({ ...formData, education: updated });
+                                }}
+                                className="text-red-400 hover:text-red-500 font-mono text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none"
+                              >
+                                <Trash2 className="w-3 h-3" /> Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Degree / Certificate</label>
+                              <input 
+                                type="text"
+                                value={edu.degree || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.education];
+                                  updated[idx] = { ...updated[idx], degree: e.target.value };
+                                  setFormData({ ...formData, education: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Institution</label>
+                              <input 
+                                type="text"
+                                value={edu.institution || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.education];
+                                  updated[idx] = { ...updated[idx], institution: e.target.value };
+                                  setFormData({ ...formData, education: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-[#ffffff] dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Year / Duration</label>
+                              <input 
+                                type="text"
+                                value={edu.year || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.education];
+                                  updated[idx] = { ...updated[idx], year: e.target.value };
+                                  setFormData({ ...formData, education: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-mono text-slate-400 dark:text-white/30 uppercase tracking-widest font-bold">Grades / DGPA</label>
+                              <input 
+                                type="text"
+                                value={edu.grades || ''}
+                                onChange={(e) => {
+                                  const updated = [...formData.education];
+                                  updated[idx] = { ...updated[idx], grades: e.target.value };
+                                  setFormData({ ...formData, education: updated });
+                                }}
+                                className="w-full px-3 py-2 text-xs bg-[#ffffff] dark:bg-[#161616] border border-slate-200 dark:border-white/10 focus:outline-none focus:border-[#F27D26]/40 text-slate-900 dark:text-white font-medium"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[9px] font-mono text-slate-400 dark:text-white/40 uppercase tracking-widest font-bold">Core Skills (separated by commas)</label>
                     <input 
@@ -685,7 +1001,8 @@ export default function ResumeBuilder() {
                       {[
                         { id: 'swiss', name: 'Swiss Minimalist', desc: 'Centered header, clean layout' },
                         { id: 'split', name: 'Split Panel Pro', desc: 'High-contrast sidebar' },
-                        { id: 'editorial', name: 'Editorial Serif', desc: 'Elegant typography pairs' }
+                        { id: 'editorial', name: 'Editorial Serif', desc: 'Elegant typography pairs' },
+                        { id: 'avik', name: "Avik's Original", desc: 'Classic two-column structural layout matching original PDF' }
                       ].map((layout) => (
                         <button
                           key={layout.id}
@@ -946,6 +1263,112 @@ export default function ResumeBuilder() {
                           <p className="text-xs leading-relaxed text-slate-700 dark:text-zinc-300 font-sans tracking-wide">
                             {formData.skills}
                           </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedLayout === 'avik' && (
+                      <div className="flex flex-wrap text-left bg-white text-slate-900 -m-6 sm:-m-8 p-6 sm:p-8 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] h-full min-h-full">
+                        {/* Header spanned across full width */}
+                        <div className="w-full border-b-2 border-slate-800 pb-4 mb-4">
+                          <h4 className="text-3xl font-bold tracking-tight text-slate-900 uppercase">{formData.name}</h4>
+                          <p className="text-sm font-medium tracking-wide mt-1" style={{ color: selectedTheme.primary }}>
+                            {formData.title}
+                          </p>
+                        </div>
+                        
+                        {/* Left column / Sidebar */}
+                        <div className="w-[33%] pr-4 space-y-5 border-r-2 border-slate-100">
+                          <div>
+                            <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-2 text-slate-800">Contact</h5>
+                            <div className="space-y-1 text-[9px] font-mono text-slate-700">
+                              {formData.address && <p>{formData.address}</p>}
+                              {formData.phone && <p>Phone: {formData.phone}</p>}
+                              {formData.email && <p>Email: {formData.email}</p>}
+                              {formData.linkedin && <p>LinkedIn: {formData.linkedin}</p>}
+                              {formData.github && <p>GitHub: {formData.github}</p>}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-2 text-slate-800">Technical Skills</h5>
+                            <div className="text-[10px] font-medium leading-relaxed text-slate-700">
+                              {formData.skills}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-2 text-slate-800">Personal Details</h5>
+                            <div className="space-y-1 text-[9px] font-mono text-slate-700">
+                              {formData.dob && <p>Date of Birth: {formData.dob}</p>}
+                              {formData.nationality && <p>Nationality: {formData.nationality}</p>}
+                              {formData.guardianName && <p>Father's Name: {formData.guardianName}</p>}
+                            </div>
+                          </div>
+                          
+                          {formData.education && formData.education.length > 0 && (
+                            <div>
+                              <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-2 text-slate-800">Education</h5>
+                              <div className="space-y-3">
+                                {formData.education.map((edu: any, i: number) => (
+                                  <div key={i} className="text-[9px] text-slate-800">
+                                    <strong className="block text-[10px] font-semibold">{edu.degree}</strong>
+                                    <p className="font-medium">{edu.institution} | {edu.year}</p>
+                                    {edu.grades && <p className="font-mono text-slate-500">Grades: {edu.grades}</p>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right column / Main */}
+                        <div className="w-[67%] pl-6 space-y-6">
+                          <div>
+                            <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-2 text-slate-800">Professional Summary</h5>
+                            <p className="text-[10px] font-medium tracking-wide leading-relaxed text-slate-800">
+                              {formData.bio}
+                            </p>
+                          </div>
+
+                          <div>
+                            <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-3 text-slate-800">Professional Experience</h5>
+                            <div className="space-y-4">
+                              {formData.experiences.map((exp: any, index: number) => (
+                                <div key={index} className="space-y-1">
+                                  <strong className="block text-[11px] font-bold text-slate-900">
+                                    {exp.role}
+                                  </strong>
+                                  <div className="flex justify-between text-[10px] font-medium text-slate-600 mb-1">
+                                    <span>{exp.company}</span>
+                                    <span>{exp.duration}</span>
+                                  </div>
+                                  <div className="text-[10px] font-medium leading-relaxed pl-3 border-l-2 border-slate-200">
+                                    {exp.description}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {formData.projects && formData.projects.length > 0 && (
+                            <div>
+                              <h5 className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 py-1 px-2 mb-3 text-slate-800">Key Projects</h5>
+                              <div className="space-y-4">
+                                {formData.projects.map((proj: any, index: number) => (
+                                  <div key={index} className="space-y-1">
+                                    <strong className="block text-[11px] font-bold text-slate-900">
+                                      {proj.name}
+                                    </strong>
+                                    {proj.stack && <p className="text-[9px] font-mono text-slate-500 mb-1">{proj.stack}</p>}
+                                    <div className="text-[10px] font-medium leading-relaxed pl-3 border-l-2 border-slate-200">
+                                      {proj.description}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1309,5 +1732,6 @@ export default function ResumeBuilder() {
         )}
       </AnimatePresence>
     </section>
+    </>
   );
 }
