@@ -5,7 +5,6 @@ import Skills from './components/Skills';
 import Experience from './components/Experience';
 import Projects from './components/Projects';
 import CertificationsAndEdu from './components/CertificationsAndEdu';
-import ResumeBuilder from './components/ResumeBuilder';
 import Contact from './components/Contact';
 import CustomCursor from './components/CustomCursor';
 import { ArrowUp, Code2, Github, Linkedin, Mail } from 'lucide-react';
@@ -60,7 +59,6 @@ export default function App() {
         <Experience />
         <Projects />
         <CertificationsAndEdu />
-        <ResumeBuilder />
         <Contact />
       </main>
 

@@ -38,6 +38,7 @@ export const PROJECTS: Project[] = [
   {
     id: "vibras",
     title: "Vibras",
+    demoUrl: "https://vibras.com/",
     subtitle: "High-Performance Monorepo Suite & Instant Chat System",
     category: "web-apps",
     tags: ["React.js", "Next.js", "TypeScript", "Monorepo", "WebSockets", "Zustand"],
@@ -53,6 +54,7 @@ export const PROJECTS: Project[] = [
   {
     id: "steelbird",
     title: "Steelbird",
+    demoUrl: "https://www.steelbirdhelmet.com/",
     subtitle: "E-Commerce Suite & Scalable Checkout Engine",
     category: "e-commerce",
     tags: ["React.js", "Next.js", "TypeScript", "Tailwind CSS", "Payment Gateways", "Zustand"],
