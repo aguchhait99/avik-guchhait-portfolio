@@ -9,19 +9,30 @@ interface DetailsModalProps {
 }
 
 export default function DetailsModal({ project, onClose }: DetailsModalProps) {
+  // Keep the page behind the dialog still while allowing the dialog content to scroll.
+  useEffect(() => {
+    if (!project) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [project]);
+
   // Listen for Escape key pressed
   useEffect(() => {
+    if (!project) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [project, onClose]);
 
   return (
     <AnimatePresence>
       {project && (
-        <div id="project-details-overlay" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div id="project-details-overlay" className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain p-3 sm:p-4">
           {/* Backdrop glassmorphism effect */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -37,7 +48,7 @@ export default function DetailsModal({ project, onClose }: DetailsModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-2xl bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-none shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+            className="relative my-auto w-full max-w-2xl bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-none shadow-2xl overflow-hidden z-10 max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] flex flex-col"
           >
             {/* Aspect card top header */}
             <div className={`p-6 sm:p-8 bg-gradient-to-br from-[#F27D26]/5 to-transparent border-b border-slate-100 dark:border-white/5 relative`}>
@@ -64,7 +75,7 @@ export default function DetailsModal({ project, onClose }: DetailsModalProps) {
             </div>
 
             {/* Scrollable specs summary panel */}
-            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1 text-left">
+            <div className="p-4 sm:p-8 overflow-y-auto overscroll-contain space-y-6 flex-1 min-h-0 text-left">
               {/* Technology badges */}
               <div className="space-y-2">
                 <h4 className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
@@ -114,11 +125,11 @@ export default function DetailsModal({ project, onClose }: DetailsModalProps) {
             </div>
 
             {/* Bottom Controls */}
-            <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-slate-50/80 dark:bg-[#161616] flex items-center justify-between gap-4">
+            <div className="p-4 sm:p-6 border-t border-slate-100 dark:border-white/10 bg-slate-50/80 dark:bg-[#161616] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="text-[10px] text-slate-400 dark:text-white/30 uppercase tracking-wider font-mono">
                 Avik Guchhait &copy; {new Date().getFullYear()}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                 <button
                   onClick={onClose}
                   className="px-4 py-2 text-xs uppercase tracking-wider font-mono text-slate-705 dark:text-white/60 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
@@ -133,7 +144,7 @@ export default function DetailsModal({ project, onClose }: DetailsModalProps) {
                     const el = document.getElementById('contact');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="px-5 py-2.5 text-[10px] uppercase tracking-widest font-bold rounded-none bg-slate-950 dark:bg-white text-white dark:text-black hover:bg-[#F27D26] dark:hover:bg-[#F27D26] dark:hover:text-white transition-all"
+                  className="px-3 sm:px-5 py-2.5 text-[10px] uppercase tracking-widest font-bold rounded-none bg-slate-950 dark:bg-white text-white dark:text-black hover:bg-[#F27D26] dark:hover:bg-[#F27D26] dark:hover:text-white transition-all"
                 >
                   Discuss Integration
                 </a>

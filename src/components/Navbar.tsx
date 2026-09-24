@@ -8,7 +8,6 @@ const NAV_ITEMS = [
   { label: 'Skills', href: '#about' },
   { label: 'Experience', href: '#experience' },
   { label: 'Projects', href: '#projects' },
-  { label: 'AI Resume', href: '#ai-resume' },
   { label: 'Contact', href: '#contact' },
 ];
 

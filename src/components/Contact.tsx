@@ -27,23 +27,8 @@ export default function Contact() {
     }
 
     setFormStatus('submitting');
-    
-    // Construct the WhatsApp message
-    const waText = `*New Portfolio Inquiry*
-Name: ${formData.name}
-Email: ${formData.email}
-Topic: ${formData.subject}
-
-Message: 
-${formData.message}`;
-
-    const encodedText = encodeURIComponent(waText);
-    // WhatsApp URL using the phone number from PERSONAL_INFO
-    const whatsappUrl = `https://wa.me/91${PERSONAL_INFO.phone}?text=${encodedText}`;
-
-    // Simulate network delay for UI effect, then dispatch
+    // Simulate API request dispatch
     setTimeout(() => {
-      window.open(whatsappUrl, '_blank');
       setFormStatus('success');
       setFormData({ name: '', email: '', subject: 'Next.js Contract Project', message: '' });
     }, 1200);

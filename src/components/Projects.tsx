@@ -128,16 +128,28 @@ export default function Projects() {
                 </div>
 
                 {/* Learn more anchor action button */}
-                <div className="pt-6 mt-5 border-t border-slate-150 dark:border-white/5 flex items-center justify-between">
+                <div className="pt-6 mt-5 border-t border-slate-150 dark:border-white/5 flex items-center justify-between gap-3">
                   <span className="text-[9px] font-mono text-slate-400 dark:text-white/30 tracking-widest uppercase">
                     Click to view details
                   </span>
-                  <button
-                    onClick={() => setSelectedProject(project)}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-none bg-slate-950 dark:bg-white text-white dark:text-black hover:bg-[#F27D26] dark:hover:bg-[#F27D26] dark:hover:text-white text-[10px] uppercase font-bold tracking-widest transition-colors cursor-pointer"
-                  >
-                    View Stack
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {project.demoUrl && (
+                      <a
+                        href={project.demoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-none border border-slate-300 dark:border-white/20 text-slate-700 dark:text-white hover:border-[#F27D26] hover:text-[#F27D26] text-[10px] uppercase font-bold tracking-widest transition-colors"
+                      >
+                        Visit Site <ArrowUpRight className="w-3 h-3" />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setSelectedProject(project)}
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-none bg-slate-950 dark:bg-white text-white dark:text-black hover:bg-[#F27D26] dark:hover:bg-[#F27D26] dark:hover:text-white text-[10px] uppercase font-bold tracking-widest transition-colors cursor-pointer"
+                    >
+                      View Stack
+                    </button>
+                  </div>
                 </div>
 
               </motion.div>
